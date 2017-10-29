@@ -22,32 +22,66 @@
 #
 #------------------------------------------------------------------------------
 include sources.mk
-
-# Platform Overrides
-PLATFORM = arm-none-eabi-gcc
-ifeq ($(PLATFORM),HOST)
-		CC = gcc
-		
-	else
-		CC = arm-none-eabi-gcc
-		-mcpu=cortex-m4
-		-mthumb
-		-march=armv7e-m
-		-mfloat-abi=hard
-		-mfpu=fpv4-sp-d16
-		--specs=nosys.specs
-
-	endif
 # Architectures Specific Flags
-LINKER_FILE =  -T msp432p401r.lds
-CPU = 
-ARCH = 
-SPECS = 
+LINKER_FILE =  -T ./msp432p401r.lds
+CPU = cortex-m4 
+ARCH = armv7e-m
+SPECS = nosys.specs
 
 # Compiler Flags and Defines
-CC = 
-LD = 
-LDFLAGS = 
-CFLAGS = 
-CPPFLAGs = 
+LD = arm-none-eabi-ld
+TARGET  = c1m2
+LDFLAGS = -Wl,-Map=$(TARGET).map \
+	  -O0     \
+	  
+          
+
+CFLAGS  := -Wall   \
+	  -Werror \
+	  -g      \
+	  -std=c99
+CPPFLAGs = -E
+ASFLAGS  = -S
+
+# Platform Overrides
+ifeq ($(PLATFORM),HOST)
+		CC = gcc
+	
+	else ifeq ($(PLATFORM),MSP432)
+		SOURCES  +=$(SRC_MSP)
+		INCLUDES +=$(MSP_INCLUDES)
+ 		CC = arm-none-eabi-gcc
+ 		PLATFORM = MSP432  		
+		LDFLAGS +=-Xlinker $(LINKER_FILE)		
+		CFLAGS +=$(CFLAGS) -mcpu=$(CPU) -march=$(ARCH) -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=$(SPECS) -mthumb
+
+	endif
+
+testflags=$(CFLAGS)
+
+OBJS  = $(SOURCES:.c=.o)
+%.o : %.c
+	$(CC) -c $< $(testflags) -D$(PLATFORM) $(INCLUDES) -o $@
+
+PRES  = $(SOURCES:.c=.i)
+%.i : %.c
+	$(CC) -E $(INCLUDES) -D$(PLATFORM) $(CLFAGS) $< -o $@
+ASMP  = $(PRES:.i=.asm)
+%.asm : %.i
+	$(CC) -S $(INCLUDES) -D$(PLATFORM) $(CLFAGS) $< -o $@ 
+DEP  = $(SOURCES:.c=.d)
+%.d : %.c
+	$(CC) -M $(INCLUDES) -D$(PLATFORM) $(CLFAGS) $< -o $@ 
+
+.PHONY: compile-all 
+compile-all: $(OBJS) 
+#
+.PHONY: build 
+build: $(TARGET).out
+$(TARGET).out: $(OBJS) $(DEP)
+	$(CC) $(INCLUDES) $(OBJS) $(CFLAGS) -D$(PLATFORM) $(LDFLAGS) -o $@  
+
+.PHONY: clean
+clean: 
+	rm -f $(OBJS) $(PRES) $(ASMP) $(TARGET).out $(TARGET).map  $(DEP)
 
