@@ -43,10 +43,7 @@ SPECS = nosys.specs
 LD = arm-none-eabi-ld
 TARGET  = c1m2
 LDFLAGS = -Wl,-Map=$(TARGET).map\
-	  -O0\
-	  
-          
-
+	  -O0
 CFLAGS  := -Wall  \
 	  -Werror \
 	  -g      \
