@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 # This is a make build file to generate different files (assembly,objects,EXE) 
 # for different PLATFORM.
-# Default PLATFORM will be the HOST machine it self
+# (Commented out-Not implemented) Default PLATFORM will be the HOST machine it self
 # Second option PLATFORM is the MSP432 platform
 # Use: make [TARGET] [PLATFORM-OVERRIDES]
 #
@@ -53,7 +53,8 @@ CFLAGS  := -Wall  \
 	  -std=c99
 CPPFLAGs = -E
 ASFLAGS  = -S
-
+# Default Platform
+# PLATFORM = HOST # Remove the comment to make the default platform is host!
 # Platform Overrides
 ifeq ($(PLATFORM),HOST)
 		CC = gcc
