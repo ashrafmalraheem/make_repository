@@ -60,7 +60,7 @@ ifeq ($(PLATFORM),HOST)
 		CC = gcc
 		AS = x86_64-linux-gnu-objdump
 		SIZEUTIL = x86_64-linux-gnu-size
-	else ifeq ($(PLATFORM),MSP432)
+else ifeq ($(PLATFORM),MSP432)
 		SOURCES  +=$(SRC_MSP)
 		INCLUDES +=$(MSP_INCLUDES)
  		CC = arm-none-eabi-gcc
@@ -68,7 +68,7 @@ ifeq ($(PLATFORM),HOST)
 		CFLAGS +=-mcpu=$(CPU) -march=$(ARCH) -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=$(SPECS) -mthumb
 		AS = arm-none-eabi-objdump
 		SIZEUTIL = arm-none-eabi-size
-	endif
+endif
 
 OBJS  := $(SOURCES:.c=.o)
 %.o : %.c
@@ -77,12 +77,9 @@ OBJS  := $(SOURCES:.c=.o)
 PRES  := $(SOURCES:.c=.i)
 %.i : %.c
 	$(CC) -E $(INCLUDES) -D$(PLATFORM) $(CLFAGS) $< -o $@
-ASMP  := $(PRES:.i=.asm)
-%.asm : %.i
-	$(CC) -S $(INCLUDES) -D$(PLATFORM) $(CLFAGS) $< -o $@
-ASMBDUMP := $(OBJS:.o=.dump)
-%.dump : %.o
-	$(AS) --disassemble -s $< > $@
+ASMBDUMP := $(OBJS:.o=.asm)
+%.asm : %.o
+	$(AS) --disassemble -S $< > $@
 DEP   := $(SOURCES:.c=.d)
 %.d : %.c
 	$(CC) -MM $(INCLUDES) -D$(PLATFORM) $(CLFAGS) $< -o $@ 
@@ -93,11 +90,12 @@ compile-all: $(OBJS)
 .PHONY: build 
 build: $(TARGET).out
 $(TARGET).out: $(OBJS) $(DEP)
-	$(CC) $(INCLUDES) $(OBJS) $(CFLAGS) -D$(PLATFORM) $(LDFLAGS) -o $@  
+	$(CC) $(INCLUDES) $(OBJS) $(CFLAGS) -D$(PLATFORM) $(LDFLAGS) -o $@ 
+	$(AS) --disassemble -S $(TARGET).out > $(TARGET).asm 
 	$(SIZEUTIL) -Btd $@ $(OBJS)
 
 .PHONY: clean
 clean: 
-	rm -f $(OBJS) $(PRES) $(ASMP)  $(ASMBDUMP) $(TARGET).out $(TARGET).map  $(DEP) ./-MD
+	rm -f $(OBJS) $(PRES) $(ASMP)  $(ASMBDUMP) $(TARGET).out $(TARGET).map  $(DEP) $(TARGET).asm ./-MD
 	ls -la
 
