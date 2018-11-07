@@ -85,7 +85,7 @@ ASMBDUMP := $(OBJS:.o=.dump)
 	$(AS) --disassemble -s $< > $@
 DEP   := $(SOURCES:.c=.d)
 %.d : %.c
-	$(CC) -MM -MF -MD $(INCLUDES) -D$(PLATFORM) $(CLFAGS) $< -o $@ 
+	$(CC) -MM $(INCLUDES) -D$(PLATFORM) $(CLFAGS) $< -o $@ 
 
 .PHONY: compile-all 
 compile-all: $(OBJS) 
