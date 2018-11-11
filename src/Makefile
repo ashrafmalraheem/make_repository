@@ -9,6 +9,8 @@
 # 
 # Modified by Ashraf Abubaker for Coursera Course in Embedded software design
 # Oct 2018
+# You can obtain this file from the Git Repository
+# https://github.com/ashrafmalraheem/make_repository
 #*****************************************************************************
 
 #------------------------------------------------------------------------------
@@ -93,6 +95,6 @@ $(TARGET).out: $(OBJS) $(DEP)
 
 .PHONY: clean
 clean: 
-	rm -f $(OBJS) $(PRES) $(ASMP)  $(ASMBDUMP) $(TARGET).out $(TARGET).map  $(DEP) $(TARGET).asm ./-MD
+	rm -f *.o *.i *.asm *.out *.map *.d 
 	ls -la
 
